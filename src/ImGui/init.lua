@@ -2,10 +2,9 @@
 
 local RunService = game:GetService("RunService")
 
-local Dependencies = script.Dependencies
 local Components = script.Components
 
-local Signal = require(Dependencies.Signal)
+local Signal = require(Components.Signal)
 local Pointer = require(Components.Pointer)
 local Stack = require(Components.Stack)
 local Types = require(Components.Types)
@@ -14,6 +13,7 @@ local Log = require(Components.Log)
 type Pointer<T> = Pointer.Pointer<T>
 type IdStack = Stack.Stack<Types.ImGuiId>
 
+-- Returns the value of Obj, if Obj is a pointer it calls Obj:Get() else return Obj
 local function GetPointerValue<T>(Obj: T | Pointer<T>): T
 	if Pointer.IsPointer(Obj) then
 		return Obj:Get()
@@ -22,6 +22,19 @@ local function GetPointerValue<T>(Obj: T | Pointer<T>): T
 	return Obj
 end
 
+ -- Should be used as PossiblePointer = SetPointerValue(PossiblePointer, DataType)
+local function SetPointerValue<T>(Obj: T | Pointer<T>, Value: any?)
+	if Pointer.IsPointer(Obj) then
+		Obj:Set(Value)
+
+		return Obj
+	end
+
+	return Value
+end
+
+-- Returns the title with seperated hash, this is to support the same naming scheme as DearImGui
+-- SeperateHashedText("Test###0123") will return a tuple of ("Test", "###0123")
 local function SeperateHashedText(Data: string): (string, string)
 	local Chars = ""
 	local HashStart = -1
@@ -78,11 +91,12 @@ function ImGui.PopId()
 	IdStack:pop()
 end
 
-function ImGui.Begin(Title: string | Pointer<string>, Open: boolean?, Flags: Types.ImGuiWindowFlags?)
+function ImGui.Begin(Title: string | Pointer<string>, Open: boolean | Pointer<boolean>?, Flags: Types.ImGuiWindowFlags?)
 	local WindowTitle, WindowHash = SeperateHashedText(tostring(GetPointerValue(Title)))
-	IM_CORE_ASSERT(WindowTitle, IM_CORE_ERROR, "Expected valid Title to ImGui.Begin()") -- Window name required
+	IM_CORE_ASSERT(WindowTitle ~= nil or #WindowTitle ~= 0, IM_CORE_ERROR, "Expected valid Title to ImGui.Begin()") -- Window name required
 
-	WindowHash = WindowHash == "" and WindowTitle or WindowHash
+	WindowHash = WindowHash == "" and WindowTitle or WindowHash -- If WindowHash == "" set it to WindowTitle
+	Flags = Flags or {}
 
 	IdStack:Push(WindowHash)
 

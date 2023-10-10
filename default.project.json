@@ -5,10 +5,7 @@
 
     "ReplicatedStorage": {
       "ImGui": {
-        "$path": "src/ImGui",
-        "Dependencies": {
-          "$path": "Dependencies"
-        }
+        "$path": "src/ImGui"
       }
     },
 

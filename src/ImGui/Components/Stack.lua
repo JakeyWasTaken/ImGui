@@ -3,7 +3,7 @@ export type Stack<T> = {
 	Pop: (self: Stack<T>) -> T,
 	Peek: (self: Stack<T>) -> T,
 	Clear: (self: Stack<T>) -> (),
-	IsEmpty: (self: Stack<T>) -> (),
+	IsEmpty: (self: Stack<T>) -> boolean,
 	Size: (self: Stack<T>) -> number,
 	Iterator: (self: Stack<T>) -> (() -> T),
 }
