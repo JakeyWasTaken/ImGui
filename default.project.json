@@ -1,0 +1,23 @@
+{
+  "name": "ImGui",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "ImGui": {
+        "$path": "src/ImGui",
+        "Dependencies": {
+          "$path": "Dependencies"
+        }
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    }
+  }
+}
