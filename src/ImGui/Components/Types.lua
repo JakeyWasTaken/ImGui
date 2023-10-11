@@ -8,23 +8,30 @@ export type ImGuiId = string
 
 export type DOM = {[string]: GenericWidget | ImGuiWindow}
 
-export type Style = {
-
-}
+export type Style = {[string]: any}
 
 export type Internal = {
     IdStack: Stack.Stack<ImGuiId>,
-    DOM: DOM,
-    LastDOM: DOM,
-    ActiveWindow: ImGuiWindow | nil,
-    ActiveStyle: Style
+    RenderTarget: BasePlayerGui,
+    Context: {
+        DOM: DOM,
+        LastDOM: DOM,
+        ActiveWindow: ImGuiWindow | nil,
+        ActiveStyle: Style,
+    }
 }
 
 export type GenericWidget = {
     Id: ImGuiId,
     Instance: Instance,
+    State: {}
 }
-export type ImGuiWindow = GenericWidget | {}
+export type ImGuiWindow = GenericWidget & {
+    State: {
+        CreationCycle: number,
+        Size: Vector2,
+    }
+}
 
 local Types = {}
 

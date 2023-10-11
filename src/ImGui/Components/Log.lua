@@ -27,24 +27,24 @@ function Log.IM_VERBOSE_ASSERT(condition, callback, ...)
     end
 end
 
-function Log.IM_VERBOSE_LOG(message: string)
+function Log.IM_VERBOSE_LOG(message: string, ...)
 	if not Log.LogVerbose then
 		return
 	end
 
 	local Indent = string.rep("    ", Log.LogIndent)
 
-	print(`{Indent}[ImGui][Log]: {message}`)
+	print(`{Indent}[ImGui][Log]: {message}`, ...)
 end
 
-function Log.IM_VERBOSE_WARN(message: string)
+function Log.IM_VERBOSE_WARN(message: string, ...)
 	if not Log.LogVerbose then
 		return
 	end
 
 	local Indent = string.rep("    ", Log.LogIndent)
 
-	warn(`{Indent}[ImGui][Warn]: {message}`)
+	warn(`{Indent}[ImGui][Warn]: {message}`, ...)
 end
 
 function Log.IM_VERBOSE_ERROR(message: string)
@@ -57,16 +57,16 @@ function Log.IM_VERBOSE_ERROR(message: string)
 	error(`{Indent}[ImGui][Error]: {message}`, 0)
 end
 
-function Log.IM_CORE_LOG(message: string)
+function Log.IM_CORE_LOG(message: string, ...)
 	local Indent = string.rep("    ", Log.LogIndent)
 
-	print(`{Indent}[ImGui][Log]: {message}`)
+	print(`{Indent}[ImGui][Log]: {message}`, ...)
 end
 
-function Log.IM_CORE_WARN(message: string)
+function Log.IM_CORE_WARN(message: string, ...)
 	local Indent = string.rep("    ", Log.LogIndent)
 
-	warn(`{Indent}[ImGui][Warn]: {message}`)
+	warn(`{Indent}[ImGui][Warn]: {message}`, ...)
 end
 
 function Log.IM_CORE_ERROR(message: string)
