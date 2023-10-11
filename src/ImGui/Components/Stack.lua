@@ -6,6 +6,7 @@ export type Stack<T> = {
 	IsEmpty: (self: Stack<T>) -> boolean,
 	Size: (self: Stack<T>) -> number,
 	Iterator: (self: Stack<T>) -> (() -> T),
+	data: {[number]: T}
 }
 
 local Stack = {}

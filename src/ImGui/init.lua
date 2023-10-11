@@ -1,14 +1,16 @@
---!strict
-
 local RunService = game:GetService("RunService")
 
 local Components = script.Components
+local Widgets = script.Widgets
 
 local Signal = require(Components.Signal)
 local Pointer = require(Components.Pointer)
 local Stack = require(Components.Stack)
 local Types = require(Components.Types)
 local Log = require(Components.Log)
+local Internal: Types.Internal = require(Components.Internal)
+
+local Window = require(Widgets.Window)
 
 type Pointer<T> = Pointer.Pointer<T>
 type IdStack = Stack.Stack<Types.ImGuiId>
@@ -60,6 +62,19 @@ local function IdStackToId(Stack: IdStack)
 	return table.concat(Stack.data, "::")
 end
 
+local function deepCopy<T>(original: T): T
+	local copy = {}
+
+	for k, v in pairs(original) do
+		if type(v) == "table" then
+			v = deepCopy(v)
+		end
+		copy[k] = v
+	end
+
+	return copy
+end
+
 local OnGui: Signal.Signal<number> = Signal.new()
 local IdStack: IdStack = Stack.new()
 local IM_INDENT_LOG = Log.IM_INDENT_LOG
@@ -77,18 +92,27 @@ local ImGui = {}
 ImGui.OnGui = OnGui
 
 function ImGui.m_Init()
+	Internal.DOM = {}
+	Internal.LastDOM = {}
+	Internal.IdStack = IdStack
+	Internal.ActiveWindow = nil
+
 	RunService.RenderStepped:Connect(function(deltaTime)
 		ImGui.OnGui:Fire(deltaTime)
 
+		IM_CORE_ASSERT(IdStack:IsEmpty(), IM_CORE_ERROR, "You've forgotten to end a widget! IdStack isn't empty!")
+
+		Internal.LastDOM = deepCopy(Internal.DOM)
+		Internal.DOM = {}
 	end)
 end
 
-function ImGui.PushId(Id: string | number)
-	IdStack:push(Id)
+function ImGui.PushId(Id: Types.ImGuiId)
+	IdStack:Push(Id)
 end
 
 function ImGui.PopId()
-	IdStack:pop()
+	IdStack:Pop()
 end
 
 function ImGui.Begin(Title: string | Pointer<string>, Open: boolean | Pointer<boolean>?, Flags: Types.ImGuiWindowFlags?)
@@ -100,16 +124,27 @@ function ImGui.Begin(Title: string | Pointer<string>, Open: boolean | Pointer<bo
 
 	IdStack:Push(WindowHash)
 
-	print("Window Id:", IdStackToId(IdStack))
-	print("Window Title:", WindowTitle)
+	local WindowId = IdStackToId(IdStack)
 
-	print("ImGuiWindowFlags:", Flags)
+	local WidgetData : Types.ImGuiWindow = Internal.LastDOM[WindowId]
+
+	if WidgetData then
+		Window.Update(WidgetData)
+	else
+		WidgetData = {
+			Id = WindowId,
+			Instance = Window.Generate(WidgetData)
+		}
+	end
+
+	Internal.DOM[WindowId] = WidgetData
+	Internal.ActiveWindow = WidgetData
 end
 
 function ImGui.End()
-	-- Somehow have to keep track of endable widgets, otherwise we can call .End() for .PopId() which I dont want to be able to do
+	IM_CORE_ASSERT(Internal.ActiveWindow, IM_CORE_ERROR, "Cannot call ImGui.End() if there is no active Window")
 
-	IM_CORE_ASSERT(not IdStack:IsEmpty(), IM_CORE_ERROR, "Too many calls to ImGui.End()") -- Not the correct implementation, TEMP
+	Internal.ActiveWindow = nil
 
 	IdStack:Pop()
 end
